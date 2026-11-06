@@ -1,64 +1,80 @@
-from bs4 import BeautifulSoup
-import requests
-import re
-import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from deep_translator import GoogleTranslator
-
-# ------------------------- Importaciones desde archivos separados -------------------------
-from funciones_scraping import scrapear_libros
-from funciones_busqueda import buscar_por_titulo, buscar_por_tematica, buscar_por_descripcion
-from funciones_filtros import filtrar_por_precio, filtrar_por_estrellas
+from funciones_busqueda import buscar_por_artista, buscar_por_descripcion, buscar_por_titulo
+from funciones_filtros import filtrar_por_cultura, filtrar_por_departamento, filtrar_por_material
 from funciones_mostrar import mostrar_resultados
+from funciones_scraping import cargar_o_scrapear
 
-# ------------------------- Menús -------------------------
+
+def pedir_cantidad():
+    valor = input("¿Cuántas obras querés descargar? (Enter = 100): ").strip()
+    if not valor:
+        return 100
+    try:
+        cantidad = int(valor)
+        if cantidad < 1:
+            raise ValueError
+        return cantidad
+    except ValueError:
+        print("Ingresá un número entero positivo.")
+        return pedir_cantidad()
+
+
 def menu_principal():
-    libros = []
+    obras = []
     while True:
-        print("\n=== MENÚ PRINCIPAL ===")
-        print("1. Scrappear 25 páginas (500 libros)")
-        print("2. Scrappear las 50 páginas (todos los libros)")
-        print("3. Salir")
-        opcion = input("Elegí una opción: ")
+        print("\n=== CATÁLOGO DEL MET ===")
+        print("1. Descargar obras y crear snapshot")
+        print("2. Cargar snapshot local")
+        print("3. Buscar y filtrar obras")
+        print("4. Salir")
+        opcion = input("Elegí una opción: ").strip()
 
         if opcion == "1":
-            libros = scrapear_libros(25)
-            menu_busqueda(libros)
+            obras = cargar_o_scrapear(pedir_cantidad(), forzar=True)
+            menu_busqueda(obras)
         elif opcion == "2":
-            libros = scrapear_libros(50)
-            menu_busqueda(libros)
+            obras = cargar_o_scrapear()
+            menu_busqueda(obras)
         elif opcion == "3":
+            if obras:
+                menu_busqueda(obras)
+            else:
+                print("Primero cargá o descargá el snapshot.")
+        elif opcion == "4":
             print("Saliendo del programa...")
             break
         else:
-            print("Opción inválida, intentá de nuevo.")
+            print("Opción inválida.")
 
-def menu_busqueda(libros):
+
+def menu_busqueda(obras):
     while True:
-        print("\n=== MENÚ DE BÚSQUEDA Y FILTROS ===")
+        print("\n=== BÚSQUEDA Y FILTROS ===")
         print("1. Buscar por título")
-        print("2. Buscar por temática")
-        print("3. Buscar por descripción")
-        print("4. Filtrar por precio")
-        print("5. Filtrar por estrellas")
-        print("6. Volver al menú principal")
-        opcion = input("Elegí una opción: ")
+        print("2. Buscar por artista")
+        print("3. Buscar en todos los datos")
+        print("4. Filtrar por cultura")
+        print("5. Filtrar por material")
+        print("6. Filtrar por departamento")
+        print("7. Mostrar todas")
+        print("8. Volver")
+        opcion = input("Elegí una opción: ").strip()
 
-        if opcion == "1":
-            buscar_por_titulo(libros)
-        elif opcion == "2":
-            buscar_por_tematica(libros)
-        elif opcion == "3":
-            buscar_por_descripcion(libros)
-        elif opcion == "4":
-            filtrar_por_precio(libros)
-        elif opcion == "5":
-            filtrar_por_estrellas(libros)
-        elif opcion == "6":
-            break
+        acciones = {
+            "1": buscar_por_titulo,
+            "2": buscar_por_artista,
+            "3": buscar_por_descripcion,
+            "4": filtrar_por_cultura,
+            "5": filtrar_por_material,
+            "6": filtrar_por_departamento,
+            "7": mostrar_resultados,
+        }
+        if opcion in acciones:
+            acciones[opcion](obras)
+        elif opcion == "8":
+            return
         else:
-            print("Opción inválida, intentá de nuevo.")
+            print("Opción inválida.")
 
-# ------------------------- Ejecución -------------------------
+
 if __name__ == "__main__":
     menu_principal()

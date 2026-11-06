@@ -1,31 +1,18 @@
-from deep_translator import GoogleTranslator
-
-def mostrar_resultados(resultados):
-    if not resultados:
+def mostrar_resultados(obras):
+    if not obras:
         print("\nNo se encontraron resultados.\n")
         return
 
-    traductor = GoogleTranslator(source="en", target="es")
+    print(f"\nSe encontraron {len(obras)} resultados. Mostrando los primeros 20:\n")
+    for indice, obra in enumerate(obras[:20], start=1):
+        print(f"{indice}. {obra['titulo']}")
+        print(f"   Artista: {obra['artista']} | Fecha: {obra['fecha']}")
+        print(f"   Cultura: {obra['cultura']} | Material: {obra['material']}")
+        print(f"   Departamento: {obra['departamento']}")
+        if obra["url"]:
+            print(f"   Página: {obra['url']}")
+        print()
 
-    print(f"\nSe encontraron {len(resultados)} resultados. Mostrando los primeros 20:\n")
-
-    def mostrar_lista(libros):
-        for i, libro in enumerate(libros, start=1):
-            try:
-                titulo_trad = traductor.translate(libro['titulo'])
-                categoria_trad = traductor.translate(libro['categoria'])
-                descripcion_trad = traductor.translate(libro['descripcion'][:120])
-            except:
-                titulo_trad = libro['titulo']
-                categoria_trad = libro['categoria']
-                descripcion_trad = libro['descripcion'][:120]
-
-            print(f"{i}. {titulo_trad} | £{libro['precio']} | {libro['estrellas']} estrellas | {categoria_trad}")
-            print(f"   {descripcion_trad}...\n")
-
-    mostrar_lista(resultados[:20])
-
-    if len(resultados) > 20:
-        ver_mas = input("¿Mostrar más resultados? (s/n): ").lower()
-        if ver_mas == "s":
-            mostrar_lista(resultados[20:])
+    if len(obras) > 20 and input("¿Mostrar el resto? (s/n): ").lower() == "s":
+        for obra in obras[20:]:
+            print(f"- {obra['titulo']} | {obra['artista']} | {obra['fecha']}")

@@ -1,22 +1,21 @@
 from funciones_mostrar import mostrar_resultados
 
-def filtrar_por_precio(libros):
-    try:
-        precio_min = float(input("Ingresá precio mínimo: ").replace(",", "."))
-        precio_max = float(input("Ingresá precio máximo: ").replace(",", "."))
-    except ValueError:
-        print("Ingresá valores numéricos válidos.")
+
+def _filtrar_por_campo(obras, campo, mensaje):
+    valor = input(mensaje).strip().lower()
+    if not valor:
+        print("Ingresá un valor para filtrar.")
         return
-    resultados = [l for l in libros if precio_min <= l["precio"] <= precio_max]
-    mostrar_resultados(resultados)
+    mostrar_resultados([obra for obra in obras if valor in obra.get(campo, "").lower()])
 
 
-def filtrar_por_estrellas(libros):
-    try:
-        estrellas = int(input("Ingresá cantidad de estrellas (1 a 5): "))
-    except ValueError:
-        print("Ingresá un número válido del 1 al 5.")
-        return
-    resultados = [l for l in libros if l["estrellas"] == estrellas]
-    mostrar_resultados(resultados)
+def filtrar_por_cultura(obras):
+    _filtrar_por_campo(obras, "cultura", "Ingresá una cultura u origen: ")
 
+
+def filtrar_por_material(obras):
+    _filtrar_por_campo(obras, "material", "Ingresá un material: ")
+
+
+def filtrar_por_departamento(obras):
+    _filtrar_por_campo(obras, "departamento", "Ingresá un departamento: ")
