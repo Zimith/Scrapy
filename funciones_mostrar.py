@@ -11,6 +11,8 @@ def mostrar_resultados(obras):
         print(f"   Departamento: {obra['departamento']}")
         if obra["url"]:
             print(f"   Página: {obra['url']}")
+        if obra["imagen"]:
+            print(f"   Imagen: {obra['imagen']}")
         print()
 
     if len(obras) > 20 and input("¿Mostrar el resto? (s/n): ").lower() == "s":

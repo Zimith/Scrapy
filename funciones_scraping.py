@@ -1,5 +1,6 @@
 import json
 import os
+import random
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -8,25 +9,47 @@ import requests
 
 API_BASE = "https://collectionapi.metmuseum.org/public/collection/v1"
 ARCHIVO_SNAPSHOT = "coleccion_met.json"
-MAX_TRABAJADORES = 8
+MAX_TRABAJADORES = 2
 
 
-def cargar_o_scrapear(cantidad=None, departamento=None, forzar=False):
+def cargar_o_scrapear(
+    cantidad=None,
+    departamento=None,
+    forzar=False,
+    aleatorio=False,
+    agregar=False,
+):
     """Carga el snapshot local o descarga obras de la API del Met."""
-    if os.path.exists(ARCHIVO_SNAPSHOT) and not forzar:
+    obras_existentes = []
+    if os.path.exists(ARCHIVO_SNAPSHOT):
         try:
             with open(ARCHIVO_SNAPSHOT, "r", encoding="utf-8") as archivo:
-                obras = json.load(archivo)
-            print(f"\nSnapshot cargado: {len(obras)} obras.")
-            return obras
+                obras_existentes = json.load(archivo)
+            if not forzar and not agregar:
+                print(f"\nSnapshot cargado: {len(obras_existentes)} obras.")
+                return obras_existentes
         except (OSError, json.JSONDecodeError) as error:
             print(f"No se pudo leer el snapshot: {error}")
+            if agregar:
+                return []
 
-    return scrapear_obras(cantidad, departamento)
+    return scrapear_obras(
+        cantidad,
+        departamento,
+        aleatorio=aleatorio,
+        obras_existentes=obras_existentes if agregar else [],
+    )
 
 
-def scrapear_obras(cantidad=None, departamento=None):
-    """Descarga detalles de obras y los guarda en un snapshot permanente."""
+def scrapear_obras(
+    cantidad=None,
+    departamento=None,
+    aleatorio=False,
+    obras_existentes=None,
+):
+    """Descarga obras y las guarda en el snapshot, evitando duplicados."""
+    obras_existentes = obras_existentes or []
+    ids_existentes = {obra.get("id") for obra in obras_existentes}
     parametros = {}
     if departamento:
         parametros["departmentIds"] = departamento
@@ -37,16 +60,19 @@ def scrapear_obras(cantidad=None, departamento=None):
         ids = respuesta.json().get("objectIDs", [])
     except requests.RequestException as error:
         print(f"No se pudo consultar la colección del Met: {error}")
-        return []
+        return obras_existentes
 
+    ids = [object_id for object_id in ids if object_id not in ids_existentes]
+    if aleatorio:
+        random.shuffle(ids)
     if cantidad and cantidad > 0:
         ids = ids[:cantidad]
     if not ids:
-        print("La API no devolvió obras para esos criterios.")
-        return []
+        print("No hay obras nuevas disponibles para esos criterios.")
+        return obras_existentes
 
     print(f"\nDescargando detalles de {len(ids)} obras...")
-    obras = []
+    obras = list(obras_existentes)
     inicio = time.time()
     with ThreadPoolExecutor(max_workers=MAX_TRABAJADORES) as executor:
         tareas = {executor.submit(obtener_obra, object_id): object_id for object_id in ids}

@@ -12,8 +12,11 @@ python scraping.py
 ```
 
 La opción **Descargar obras** consulta la API oficial, guarda los datos en
-`coleccion_met.json` y abre el menú de búsqueda. La opción **Cargar snapshot
-local** reutiliza ese archivo sin hacer nuevas consultas a Internet.
+`coleccion_met.json` y abre el menú de búsqueda. Permite elegir una descarga
+normal o aleatoria y reemplaza el snapshot anterior. La opción **Agregar obras
+al snapshot** descarga obras nuevas sin repetir las que ya están guardadas.
+La opción **Cargar snapshot local** reutiliza ese archivo sin hacer nuevas
+consultas a Internet.
 
 El snapshot incluye título, artista, fecha, cultura, material, departamento,
 clasificación, página de la obra e imagen cuando están disponibles.
@@ -25,4 +28,5 @@ Los datos provienen de la API pública del Met:
 `https://collectionapi.metmuseum.org/public/collection/v1`
 
 El programa descarga 100 obras por defecto. Se puede indicar otra cantidad
-desde el menú y volver a descargar para reemplazar el snapshot.
+desde el menú. En los resultados se muestran la página de la obra y el enlace
+directo a la imagen cuando están disponibles.

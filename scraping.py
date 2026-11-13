@@ -18,28 +18,48 @@ def pedir_cantidad():
         return pedir_cantidad()
 
 
+def pedir_modo_descarga():
+    while True:
+        opcion = input("¿Descarga normal o aleatoria? (n/r): ").strip().lower()
+        if opcion in ("n", "r"):
+            return opcion == "r"
+        print("Elegí 'n' para normal o 'r' para aleatoria.")
+
+
 def menu_principal():
     obras = []
     while True:
         print("\n=== CATÁLOGO DEL MET ===")
         print("1. Descargar obras y crear snapshot")
-        print("2. Cargar snapshot local")
-        print("3. Buscar y filtrar obras")
-        print("4. Salir")
+        print("2. Agregar obras al snapshot")
+        print("3. Cargar snapshot local")
+        print("4. Buscar y filtrar obras")
+        print("5. Salir")
         opcion = input("Elegí una opción: ").strip()
 
         if opcion == "1":
-            obras = cargar_o_scrapear(pedir_cantidad(), forzar=True)
+            obras = cargar_o_scrapear(
+                pedir_cantidad(),
+                forzar=True,
+                aleatorio=pedir_modo_descarga(),
+            )
             menu_busqueda(obras)
         elif opcion == "2":
-            obras = cargar_o_scrapear()
+            obras = cargar_o_scrapear(
+                pedir_cantidad(),
+                aleatorio=pedir_modo_descarga(),
+                agregar=True,
+            )
             menu_busqueda(obras)
         elif opcion == "3":
+            obras = cargar_o_scrapear()
+            menu_busqueda(obras)
+        elif opcion == "4":
             if obras:
                 menu_busqueda(obras)
             else:
                 print("Primero cargá o descargá el snapshot.")
-        elif opcion == "4":
+        elif opcion == "5":
             print("Saliendo del programa...")
             break
         else:
